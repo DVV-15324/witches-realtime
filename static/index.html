@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>WebSocket Test</title>
+    <style>
+        body {
+            font-family: Arial;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        #messages {
+            border: 1px solid #ccc;
+            height: 300px;
+            overflow-y: scroll;
+            padding: 10px;
+            margin: 10px 0;
+        }
+
+        .msg {
+            margin: 5px 0;
+            padding: 5px 10px;
+            border-radius: 5px;
+        }
+
+        .msg.self {
+            background: #dcf8c6;
+            text-align: right;
+        }
+
+        .msg.other {
+            background: #f0f0f0;
+        }
+
+        .msg.system {
+            color: #666;
+            font-style: italic;
+            text-align: center;
+        }
+
+        .msg.private {
+            background: #fff3cd;
+            border-left: 3px solid #ffc107;
+        }
+
+        input,
+        button {
+            padding: 8px 12px;
+            margin: 2px;
+        }
+
+        #controls {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        #chatArea {
+            display: flex;
+            gap: 10px;
+        }
+
+        #msgInput {
+            flex: 1;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>🧙 Witches Chat</h1>
+
+    <div id="controls">
+        <div>
+            <strong>Room:</strong>
+            <input id="room" value="general" placeholder="Room name" style="width:120px;">
+            <button id="joinBtn">Join</button>
+            <button id="leaveBtn">Leave</button>
+        </div>
+        <div>
+            <strong>Private to:</strong>
+            <input id="targetInput" placeholder="User ID" style="width:120px;">
+        </div>
+        <div>
+            <strong>Current Room:</strong>
+            <span id="currentRoom">None</span>
+        </div>
+    </div>
+
+    <hr>
+
+    <div id="messages"></div>
+
+    <div id="chatArea">
+        <input id="msgInput" placeholder="Type message...">
+        <button id="sendBtn">Send</button>
+    </div>
+
+    <script>
+        const ws = new WebSocket('ws://localhost:8080/ws');
+
+        const messagesDiv = document.getElementById('messages');
+        const roomInput = document.getElementById('room');
+        const msgInput = document.getElementById('msgInput');
+        const targetInput = document.getElementById('targetInput');
+        const currentRoom = document.getElementById('currentRoom');
+
+        let myUserID = '';
+        let joinedRoom = '';
+
+        function appendMessage(msg, className = '') {
+            const div = document.createElement('div');
+            div.className = 'msg ' + className;
+            div.textContent = msg;
+            messagesDiv.appendChild(div);
+            messagesDiv.scrollTop = messagesDiv.scrollHeight;
+        }
+
+        function setCurrentRoom(room) {
+            joinedRoom = room || '';
+            currentRoom.textContent = room || 'None';
+        }
+
+        function sendAction(action, data = {}) {
+            if (ws.readyState !== WebSocket.OPEN) {
+                appendMessage('❌ WebSocket is not connected', 'system');
+                return;
+            }
+
+            ws.send(JSON.stringify({
+                action,
+                ...data
+            }));
+        }
+
+        ws.onopen = () => {
+            appendMessage('✅ Connected to server', 'system');
+
+            joinRoom('general');
+        };
+
+        ws.onmessage = (event) => {
+            let data;
+
+            try {
+                data = JSON.parse(event.data);
+            } catch {
+                appendMessage(event.data, 'other');
+                return;
+            }
+
+            if (data.sender_id && !myUserID) {
+                myUserID = data.sender_id;
+            }
+
+            if (data.type === 'system') {
+                appendMessage(
+                    '[System] ' + (data.data?.message || ''),
+                    'system'
+                );
+                return;
+            }
+
+            if (data.type === 'chat') {
+                const isSelf = data.sender_id === myUserID;
+                const isPrivate =
+                    data.room_id &&
+                    data.room_id.startsWith('private:');
+
+                const sender =
+                    data.sender_name ||
+                    data.sender_id ||
+                    'Unknown';
+
+                const msg =
+                    data.data?.message ||
+                    data.payload?.message ||
+                    JSON.stringify(data);
+
+                let className = isSelf ? 'self' : 'other';
+
+                if (isPrivate) {
+                    className += ' private';
+                }
+
+                const label = isPrivate ? '🔒 ' : '';
+
+                appendMessage(
+                    label + sender + ': ' + msg,
+                    className
+                );
+
+                return;
+            }
+
+            if (data.action === 'typing') {
+                return;
+            }
+
+            appendMessage(JSON.stringify(data), 'system');
+        };
+
+        ws.onclose = () => {
+            appendMessage('❌ Disconnected', 'system');
+            setCurrentRoom('');
+        };
+
+        ws.onerror = () => {
+            appendMessage('❌ WebSocket error', 'system');
+        };
+
+        function joinRoom(room) {
+            room = room.trim();
+
+            if (!room) {
+                return;
+            }
+
+            sendAction('join', {
+                room_id: room
+            });
+
+            setCurrentRoom(room);
+
+            appendMessage(
+                '📥 Joining room: ' + room,
+                'system'
+            );
+        }
+
+        function leaveRoom() {
+            if (!joinedRoom) {
+                appendMessage(
+                    '⚠️ You are not in a room',
+                    'system'
+                );
+                return;
+            }
+
+            sendAction('leave', {
+                room_id: joinedRoom
+            });
+
+            appendMessage(
+                '📤 Leaving room: ' + joinedRoom,
+                'system'
+            );
+
+            setCurrentRoom('');
+        }
+
+        function sendChat() {
+            const text = msgInput.value.trim();
+
+            if (!text) {
+                return;
+            }
+
+            const target = targetInput.value.trim();
+            const room = joinedRoom || roomInput.value.trim();
+
+            const payload = {
+                message: text,
+                time: new Date().toLocaleTimeString(),
+                username: 'You'
+            };
+
+            // Private chat
+            if (target) {
+                sendAction('chat', {
+                    target_id: target,
+                    payload
+                });
+
+                appendMessage(
+                    '🔒 You to ' + target + ': ' + text,
+                    'self private'
+                );
+
+                msgInput.value = '';
+                return;
+            }
+
+            // Room chat
+            if (!room) {
+                appendMessage(
+                    '⚠️ Please join a room first',
+                    'system'
+                );
+                return;
+            }
+
+            sendAction('chat', {
+                room_id: room,
+                payload
+            });
+
+            appendMessage(
+                'You: ' + text,
+                'self'
+            );
+
+            msgInput.value = '';
+        }
+
+        document.getElementById('joinBtn').onclick = () => {
+            const room = roomInput.value.trim();
+
+            if (room) {
+                joinRoom(room);
+            }
+        };
+
+        document.getElementById('leaveBtn').onclick = () => {
+            leaveRoom();
+        };
+
+        document.getElementById('sendBtn').onclick = () => {
+            sendChat();
+        };
+
+        msgInput.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') {
+                sendChat();
+            }
+        });
+    </script>
+</body>
+
+</html>
