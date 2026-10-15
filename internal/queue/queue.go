@@ -30,7 +30,7 @@ type Queue struct {
 type Message struct {
 	ID        string          `json:"id"`
 	Type      string          `json:"type"`
-	Room      string          `json:"room"`
+	RoomID    string          `json:"room_id"`
 	Payload   json.RawMessage `json:"payload"`
 	ClientID  string          `json:"client_id"`
 	Timestamp time.Time       `json:"timestamp"`
@@ -125,7 +125,7 @@ func (q *Queue) Push(msg Message) error {
 		}()
 	}
 
-	log.Printf("[QUEUE] Pushed: %s | type=%s | room=%s", msg.ID, msg.Type, msg.Room)
+	log.Printf("[QUEUE] Pushed: %s | type=%s | roomId=%s", msg.ID, msg.Type, msg.RoomID)
 	return nil
 }
 
@@ -302,11 +302,11 @@ func (q *Queue) loadFromFile() error {
 
 //  HELPER FUNCTIONS
 
-func NewMessage(msgType, room string, payload []byte, clientID string) Message {
+func NewMessage(msgType, roomID string, payload []byte, clientID string) Message {
 	return Message{
 		ID:        generateID(),
 		Type:      msgType,
-		Room:      room,
+		RoomID:    roomID,
 		Payload:   payload,
 		ClientID:  clientID,
 		Timestamp: time.Now(),
