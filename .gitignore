@@ -1,1 +1,9 @@
+# Binaries
+*.exe
+*.exe~
+
+# Log files
 *.log
+data/messages/*.log
+data/queue/*.log
+
