@@ -30,10 +30,8 @@ func NewServer(cfg config.Config) *Server {
 		}
 	}
 
-	// Tạo Hub với FileWriter
 	h := NewHub(cfg.Logger, cfg.Broker, cfg.ShutdownCtx, fileWriter, "server-0001")
 
-	// Gán callbacks (tách biệt Local và Broker)
 	h.OnConnect = cfg.OnConnect
 	h.OnDisconnect = cfg.OnDisconnect
 	h.OnLocalMessage = cfg.OnLocalMessage   // message từ client
@@ -53,7 +51,7 @@ func (s *Server) Handler() http.HandlerFunc {
 
 	return func(w http.ResponseWriter, r *http.Request) {
 		var clientID string
-		var metadata map[string]interface{}
+		var metadata map[string]any
 		if s.config.AuthFunc != nil {
 			id, meta, err := s.config.AuthFunc(r)
 			if err != nil {
@@ -64,7 +62,7 @@ func (s *Server) Handler() http.HandlerFunc {
 			metadata = meta
 		} else {
 			clientID = s.config.UID.ToBase58()
-			metadata = make(map[string]interface{})
+			metadata = make(map[string]any)
 		}
 
 		conn, err := upgrader.Upgrade(w, r, nil)
