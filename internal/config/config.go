@@ -16,18 +16,19 @@ type Config struct {
 	PingInterval time.Duration
 
 	// Redis config (optional)
-	RedisAddr     string
-	RedisPassword string
-	RedisDB       int
-	RedisChannel  string
+	RedisAddr        string
+	RedisPassword    string
+	RedisDB          int
+	RedisChannel     string
+	DisableProcessor bool
 
 	// Persist
-	PersistPath   string // "/var/log/ws-messages/"
-	EnablePersist bool   // true/false
+	PersistPath   string
+	EnablePersist bool
 
 	// Callbacks
 	OnConnect       func(client types.IClient)
 	OnDisconnect    func(client types.IClient)
-	OnLocalMessage  func(client types.IClient, msg []byte) // message từ client
-	OnBrokerMessage func(msg []byte)                       // message từ Redis
+	OnLocalMessage  func(client types.IClient, msg []byte)
+	OnBrokerMessage func(msg []byte)
 }
