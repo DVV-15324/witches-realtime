@@ -13,13 +13,13 @@ import (
 	"realtime/internal/model"
 	"realtime/internal/queue"
 	"realtime/internal/types"
+	"realtime/internal/worker"
 	"realtime/pkg/adapter"
 	"realtime/pkg/uid"
 	"time"
 )
 
 func main() {
-
 	// 1. INIT COMPONENTS
 	uid.Bits = 26
 	idGen := adapter.NewUIDAdapter(1)
@@ -38,7 +38,7 @@ func main() {
 	// Đăng ký handlers cho queue
 	q.RegisterHandler("local", func(msg queue.Message) {
 		log.Printf("[QUEUE-HANDLER] local: room=%s, payload=%s",
-			msg.Room, string(msg.Payload))
+			msg.RoomID, string(msg.Payload))
 		// Có thể lưu DB, analytics, v.v...
 	})
 
@@ -47,26 +47,54 @@ func main() {
 	})
 	// 2. CONFIG
 	cfg := config.Config{
-		Logger:       logger,
-		UID:          idGen,
-		Broker:       nil, // Local mode: không cần Redis
-		AuthFunc:     nil,
-		ShutdownCtx:  context.Background(),
-		WSPath:       "/ws",
-		PingInterval: 30 * time.Second,
-
+		Logger:           logger,
+		UID:              idGen,
+		Broker:           nil, // Local mode: không cần Redis
+		AuthFunc:         nil,
+		ShutdownCtx:      context.Background(),
+		WSPath:           "/ws",
+		PingInterval:     30 * time.Second,
+		DisableProcessor: true,
 		// Enable persist để ghi file log
 		EnablePersist: true,
 		PersistPath:   "./data/messages/",
 	}
+
 	// 3. CREATE SERVER
 	rt := hub.NewServer(cfg)
+
+	queueHandler := func(msg *queue.Message) {
+		log.Printf("[WORKER] Processing %s, type=%s", msg.ID, msg.Type)
+
+		switch msg.Type {
+		case "chat":
+			var chatMsg model.ChatMessage
+			if err := json.Unmarshal(msg.Payload, &chatMsg); err != nil {
+				log.Printf("[WORKER] Invalid payload: %v", err)
+				return
+			}
+			// LƯU DB, ANALYTICS, NOTIFICATION...
+			log.Printf("[WORKER] Saving to DB: %+v", chatMsg)
+
+		case "system":
+			log.Printf("[WORKER] System message: %s", string(msg.Payload))
+
+		default:
+			log.Printf("[WORKER] Unknown type: %s", msg.Type)
+		}
+	}
 	hub.SetQueue(q)
+	// Tạo QueueWorker với 5 worker, poll mỗi 200ms
+	qw := worker.NewQueueWorker(q, queueHandler, 5, 200*time.Millisecond)
+	qw.Start()
+
+	// Đảm bảo dừng worker khi server tắt
+	defer qw.Stop()
 	// 4. SETUP CALLBACKS
 	// LOCAL EVENT (message từ client)
 	rt.Hub.OnLocalMessage = func(client types.IClient, msg []byte) {
 		log.Printf("[LOCAL] [%s] message: %s", client.GetID(), string(msg))
-		// Parse message để lấy action
+
 		var req struct {
 			Action  string          `json:"action"`
 			Room    string          `json:"room,omitempty"`
@@ -76,26 +104,18 @@ func main() {
 			log.Printf("Invalid message: %v", err)
 			return
 		}
-		// Nếu là action chat
+
 		if req.Action == "chat" {
 			var chatMsg model.ChatMessage
 			if err := json.Unmarshal(req.Payload, &chatMsg); err != nil {
 				log.Printf("Invalid chat payload: %v", err)
 				return
 			}
-			// GetRoomID Broadcast đến room của client
-			if client.GetRoomID() != "" {
-				// Gửi đến room cụ thể (local + broker)
-				bro.BroadcastToRoomAndBroker(rt.Hub, client.GetRoomID(), msg)
-			} else {
-				// Nếu chưa có room, broadcast global
-				// GetRoomID Dùng BroadcastToAll thay vì gọi unexported method
-				helper.BroadcastToAll(rt.Hub, model.BaseMessage{
-					Type: "chat",
-					Data: chatMsg,
-				})
-			}
+			// CHỈ XỬ LÝ BUSINESS LOGIC (ví dụ: lưu DB, kiểm tra quyền)
+			log.Printf("[BUSINESS] Chat from %s in room %s: %s",
+				chatMsg.Username, client.GetRoomID(), chatMsg.Message)
 		}
+		// KHÔNG GỌI broadcast Ở ĐÂY
 	}
 	// BROKER EVENT (message từ Redis) - KHÔNG DÙNG local
 	rt.Hub.OnBrokerMessage = func(msg []byte) {
