@@ -1,10 +1,10 @@
 package client
 
 import (
-	"realtime/internal/hub/action"
-	"realtime/internal/hub/broardcast/local"
-	"realtime/internal/hub/helper"
-	"realtime/internal/model"
+	"github.com/DVV-15324/witches-realtime/internal/hub/action"
+	"github.com/DVV-15324/witches-realtime/internal/hub/broardcast/local"
+	"github.com/DVV-15324/witches-realtime/internal/hub/helper"
+	"github.com/DVV-15324/witches-realtime/internal/model"
 )
 
 func (c *Client) HandleAction(req *model.Action, raw []byte) {

@@ -1,9 +1,9 @@
 package broker
 
 import (
-	"realtime/internal/model"
-	"realtime/internal/queue"
-	"realtime/internal/types"
+	"github.com/DVV-15324/witches-realtime/internal/model"
+	"github.com/DVV-15324/witches-realtime/internal/queue"
+	"github.com/DVV-15324/witches-realtime/internal/types"
 )
 
 func BroadcastToAllAndBroker(h types.IHub, msg model.Message, msgQueue *queue.Queue) {

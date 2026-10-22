@@ -2,8 +2,8 @@ package hub
 
 import (
 	"context"
-	"realtime/internal/persist"
-	"realtime/internal/types"
+	"github.com/DVV-15324/witches-realtime/internal/persist"
+	"github.com/DVV-15324/witches-realtime/internal/types"
 	"sync"
 )
 

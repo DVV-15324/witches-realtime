@@ -1,9 +1,9 @@
 package helper
 
 import (
-	"realtime/internal/hub/broardcast/broker"
-	"realtime/internal/model"
-	"realtime/internal/types"
+	"github.com/DVV-15324/witches-realtime/internal/hub/broardcast/broker"
+	"github.com/DVV-15324/witches-realtime/internal/model"
+	"github.com/DVV-15324/witches-realtime/internal/types"
 )
 
 func SendToClient(h types.IHub, clientID string, msg model.Message) error {

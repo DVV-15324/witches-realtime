@@ -1,7 +1,7 @@
 package adapter
 
 import (
-	"realtime/pkg/uid"
+	"github.com/DVV-15324/witches-realtime/pkg/uid"
 	"sync/atomic"
 )
 

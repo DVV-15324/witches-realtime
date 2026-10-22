@@ -2,7 +2,7 @@ package config
 
 import (
 	"context"
-	"realtime/internal/types"
+	"github.com/DVV-15324/witches-realtime/internal/types"
 	"time"
 )
 

@@ -2,8 +2,8 @@ package broker
 
 import (
 	"encoding/json"
-	"realtime/internal/hub/broardcast/local"
-	"realtime/internal/types"
+	"github.com/DVV-15324/witches-realtime/internal/hub/broardcast/local"
+	"github.com/DVV-15324/witches-realtime/internal/types"
 )
 
 // BroadcastToRoomAndBroker: gửi message đến room và publish lên broker

@@ -1,14 +1,14 @@
 package hub
 
 import (
+	"github.com/DVV-15324/witches-realtime/internal/client"
+	"github.com/DVV-15324/witches-realtime/internal/config"
+	"github.com/DVV-15324/witches-realtime/internal/hub/broardcast/broker"
+	"github.com/DVV-15324/witches-realtime/internal/hub/helper"
+	"github.com/DVV-15324/witches-realtime/internal/model"
+	"github.com/DVV-15324/witches-realtime/internal/persist"
+	"github.com/DVV-15324/witches-realtime/internal/queue"
 	"net/http"
-	"realtime/internal/client"
-	"realtime/internal/config"
-	"realtime/internal/hub/broardcast/broker"
-	"realtime/internal/hub/helper"
-	"realtime/internal/model"
-	"realtime/internal/persist"
-	"realtime/internal/queue"
 
 	"github.com/gorilla/websocket"
 )

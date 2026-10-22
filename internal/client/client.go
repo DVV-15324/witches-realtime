@@ -1,8 +1,8 @@
 package client
 
 import (
-	"realtime/internal/model"
-	"realtime/internal/types"
+	"github.com/DVV-15324/witches-realtime/internal/model"
+	"github.com/DVV-15324/witches-realtime/internal/types"
 
 	"github.com/gorilla/websocket"
 )

@@ -2,8 +2,8 @@ package types
 
 import (
 	"context"
+	"github.com/DVV-15324/witches-realtime/internal/model"
 	"net/http"
-	"realtime/internal/model"
 	"sync"
 )
 

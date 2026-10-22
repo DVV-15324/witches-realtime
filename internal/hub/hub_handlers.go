@@ -2,10 +2,10 @@ package hub
 
 import (
 	"encoding/json"
-	"realtime/internal/hub/broardcast/broker"
-	"realtime/internal/hub/broardcast/local"
-	"realtime/internal/queue"
-	"realtime/internal/types"
+	"github.com/DVV-15324/witches-realtime/internal/hub/broardcast/broker"
+	"github.com/DVV-15324/witches-realtime/internal/hub/broardcast/local"
+	"github.com/DVV-15324/witches-realtime/internal/queue"
+	"github.com/DVV-15324/witches-realtime/internal/types"
 	"time"
 )
 

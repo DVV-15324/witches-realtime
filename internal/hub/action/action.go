@@ -1,7 +1,7 @@
 package action
 
 import (
-	"realtime/internal/types"
+	"github.com/DVV-15324/witches-realtime/internal/types"
 )
 
 func JoinRoom(h types.IHub, clientID, room string) {

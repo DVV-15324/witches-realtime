@@ -1,7 +1,7 @@
 package worker
 
 import (
-	"realtime/internal/queue"
+	"github.com/DVV-15324/witches-realtime/internal/queue"
 	"sync"
 	"time"
 )

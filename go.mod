@@ -1,4 +1,4 @@
-module realtime
+module github.com/DVV-15324/witches-realtime
 
 go 1.24
 

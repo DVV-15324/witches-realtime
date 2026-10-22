@@ -1,7 +1,7 @@
 package client
 
 import (
-	"realtime/internal/model"
+	"github.com/DVV-15324/witches-realtime/internal/model"
 )
 
 func (c *Client) SendBytes(data []byte) error {

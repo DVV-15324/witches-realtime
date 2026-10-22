@@ -2,8 +2,8 @@ package client
 
 import (
 	"encoding/json"
+	"github.com/DVV-15324/witches-realtime/internal/model"
 	"github.com/gorilla/websocket"
-	"realtime/internal/model"
 	"time"
 )
 

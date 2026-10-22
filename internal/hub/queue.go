@@ -1,6 +1,6 @@
 package hub
 
-import "realtime/internal/queue"
+import "github.com/DVV-15324/witches-realtime/internal/queue"
 
 var msgQueue *queue.Queue
 

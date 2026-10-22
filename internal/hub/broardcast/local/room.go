@@ -1,7 +1,7 @@
 package local
 
 import (
-	"realtime/internal/types"
+	"github.com/DVV-15324/witches-realtime/internal/types"
 )
 
 func BroadcastToRoomLocal(h types.IHub, room string, msg []byte) {
