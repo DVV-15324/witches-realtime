@@ -1,11 +1,15 @@
 package hub
 
+import (
+	"fmt"
+)
+
 func (h *Hub) Run() {
 	// Subscribe Redis (broker)
 	if h.broker != nil {
 		brokerCh, err := h.broker.Subscribe(h.ctx)
 		if err != nil {
-			h.logger.Error("broker subscribe error", "err", err)
+			h.logger.Error(fmt.Sprintf("broker subscribe error: %v", err))
 		} else {
 			go func() {
 				for msg := range brokerCh {
@@ -30,7 +34,7 @@ func (h *Hub) Run() {
 			h.clients[client.GetID()] = client
 			h.mu.Unlock()
 
-			h.logger.Info("client connected", "id", client.GetID())
+			h.logger.Info(fmt.Sprintf("client connected, id=%s", client.GetID()))
 			if h.OnConnect != nil {
 				h.OnConnect(client)
 			}
@@ -52,7 +56,7 @@ func (h *Hub) Run() {
 			}
 			h.mu.Unlock()
 
-			h.logger.Info("client disconnected", "id", client.GetID())
+			h.logger.Info(fmt.Sprintf("client disconnected, id=%s", client.GetID()))
 			if h.OnDisconnect != nil {
 				h.OnDisconnect(client)
 			}

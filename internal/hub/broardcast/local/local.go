@@ -1,6 +1,8 @@
 package local
 
 import (
+	"fmt"
+
 	"github.com/DVV-15324/witches-realtime/internal/types"
 )
 
@@ -16,9 +18,7 @@ func BroadcastToLocalClientsExclude(h types.IHub, message []byte, excludeID stri
 
 	for _, client := range clients {
 		if err := client.SendBytes(message); err != nil {
-			h.GetLogger().Error("broadcastToLocalClientsExclude send error",
-				"clientID", client.GetID(),
-				"err", err)
+			h.GetLogger().Error(fmt.Sprintf("broadcastToLocalClientsExclude send error, clientID=%s, err=%v", client.GetID(), err))
 		}
 	}
 }

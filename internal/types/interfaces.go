@@ -9,17 +9,8 @@ import (
 
 type IHub interface {
 	HandleLocalMessage(client IClient, message []byte)
-	//	BroadcastToLocalClients(message []byte)
-	//JoinRoom(clientID, room string)
-	//LeaveRoom(clientID, room string)
-	//BroadcastToRoomLocal(room string, msg []byte)
-	//BroadcastToRoomAndBroker(room string, msg []byte)
-	//BroadcastToAll(msg model.Message)
 	GetClients() map[string]IClient
-	//	GetClientCount() int
-	//	GetClientByUserID(userID string) IClient
 	GetBroker() IBroker
-	//CloseAll()
 	GetLogger() ILogger
 	GetRegister() chan IClient
 	GetMutex() *sync.RWMutex
@@ -30,7 +21,6 @@ type IHub interface {
 	GetOnDisconnect() func(IClient)
 	GetOnLocalMessage() func(IClient, []byte)
 	GetOnBrokerMessage() func([]byte)
-	//HandleLocalMessage(client IClient, message []byte)
 }
 
 type IClient interface {
@@ -54,10 +44,10 @@ type IUID interface {
 }
 
 type ILogger interface {
-	Info(msg string, keysAndValues ...interface{})
-	Error(msg string, keysAndValues ...interface{})
-	Debug(msg string, keysAndValues ...interface{})
-	Warn(msg string, keysAndValues ...interface{})
+	Info(msg string)
+	Warn(msg string)
+	Error(msg string)
+	Debug(msg string)
 }
 
 type IBroker interface {

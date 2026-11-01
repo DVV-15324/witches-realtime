@@ -3,6 +3,7 @@ package persist
 import (
 	"bufio"
 	"encoding/json"
+	t "github.com/DVV-15324/witches-realtime/internal/types"
 	"os"
 	"sync"
 	"time"
@@ -13,10 +14,7 @@ type FileWriter struct {
 	writer *bufio.Writer
 	mu     sync.Mutex
 	path   string
-	logger interface {
-		Info(msg string, args ...interface{})
-		Error(msg string, args ...interface{})
-	}
+	logger t.ILogger
 }
 
 type MessageLog struct {
@@ -30,10 +28,7 @@ type MessageLog struct {
 	ServerID  string          `json:"server_id"`
 }
 
-func NewFileWriter(path string, logger interface {
-	Info(msg string, args ...interface{})
-	Error(msg string, args ...interface{})
-}) (*FileWriter, error) {
+func NewFileWriter(path string, logger t.ILogger) (*FileWriter, error) {
 	// Tạo thư mục nếu chưa tồn tại
 	if err := os.MkdirAll(path, 0755); err != nil {
 		return nil, err

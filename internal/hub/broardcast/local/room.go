@@ -1,6 +1,8 @@
 package local
 
 import (
+	"fmt"
+
 	"github.com/DVV-15324/witches-realtime/internal/types"
 )
 
@@ -14,10 +16,7 @@ func BroadcastToRoomLocal(h types.IHub, room string, msg []byte) {
 
 	for _, client := range members {
 		if err := client.SendBytes(msg); err != nil {
-			h.GetLogger().Error("BroadcastToRoomLocal send error",
-				"room", room,
-				"clientID", client.GetID(),
-				"err", err)
+			h.GetLogger().Error(fmt.Sprintf("BroadcastToRoomLocal send error, room=%s, clientID=%s, err=%v", room, client.GetID(), err))
 		}
 	}
 }

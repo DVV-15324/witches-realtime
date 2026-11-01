@@ -2,6 +2,8 @@ package broker
 
 import (
 	"encoding/json"
+	"fmt"
+
 	"github.com/DVV-15324/witches-realtime/internal/hub/broardcast/local"
 	"github.com/DVV-15324/witches-realtime/internal/types"
 )
@@ -21,11 +23,11 @@ func BroadcastToRoomAndBroker(h types.IHub, room string, msg []byte) {
 		}
 		data, err := json.Marshal(wrappedMsg)
 		if err != nil {
-			h.GetLogger().Error("marshal room message error", "err", err)
+			h.GetLogger().Error(fmt.Sprintf("marshal room message error: %v", err))
 			return
 		}
 		if err := h.GetBroker().Publish(data); err != nil {
-			h.GetLogger().Error("broker publish error", "err", err)
+			h.GetLogger().Error(fmt.Sprintf("broker publish error: %v", err))
 		}
 	}
 }

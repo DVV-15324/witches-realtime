@@ -1,6 +1,9 @@
 package hub
 
 import (
+	"fmt"
+	"net/http"
+
 	"github.com/DVV-15324/witches-realtime/internal/client"
 	"github.com/DVV-15324/witches-realtime/internal/config"
 	"github.com/DVV-15324/witches-realtime/internal/hub/broardcast/broker"
@@ -8,8 +11,6 @@ import (
 	"github.com/DVV-15324/witches-realtime/internal/model"
 	"github.com/DVV-15324/witches-realtime/internal/persist"
 	"github.com/DVV-15324/witches-realtime/internal/queue"
-	"net/http"
-
 	"github.com/gorilla/websocket"
 )
 
@@ -23,10 +24,10 @@ func NewServer(cfg config.Config) *Server {
 	if cfg.EnablePersist && cfg.PersistPath != "" {
 		fw, err := persist.NewFileWriter(cfg.PersistPath, cfg.Logger)
 		if err != nil {
-			cfg.Logger.Error("Failed to create file writer", "err", err)
+			cfg.Logger.Error(fmt.Sprintf("failed to create file writer: %v", err))
 		} else {
 			fileWriter = fw
-			cfg.Logger.Info("File writer initialized", "path", cfg.PersistPath)
+			cfg.Logger.Info(fmt.Sprintf("file writer initialized, path=%s", cfg.PersistPath))
 		}
 	}
 
@@ -44,6 +45,7 @@ func NewServer(cfg config.Config) *Server {
 		config: cfg,
 	}
 }
+
 func (s *Server) Handler() http.HandlerFunc {
 	upgrader := websocket.Upgrader{
 		CheckOrigin: func(r *http.Request) bool { return true },
@@ -67,7 +69,7 @@ func (s *Server) Handler() http.HandlerFunc {
 
 		conn, err := upgrader.Upgrade(w, r, nil)
 		if err != nil {
-			s.config.Logger.Error("upgrade error", "err", err)
+			s.config.Logger.Error(fmt.Sprintf("upgrade error: %v", err))
 			return
 		}
 

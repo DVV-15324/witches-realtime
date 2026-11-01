@@ -4,6 +4,10 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"log"
+	"net/http"
+	"time"
+
 	"github.com/DVV-15324/witches-realtime/internal/config"
 	"github.com/DVV-15324/witches-realtime/internal/hub"
 	bro "github.com/DVV-15324/witches-realtime/internal/hub/broardcast/broker"
@@ -14,16 +18,14 @@ import (
 	"github.com/DVV-15324/witches-realtime/internal/worker"
 	"github.com/DVV-15324/witches-realtime/pkg/adapter"
 	"github.com/DVV-15324/witches-realtime/pkg/uid"
-	"log"
-	"net/http"
-	"time"
+	logg "github.com/DVV-15324/witches/pkg/core/response/logger"
 )
 
 func main() {
 	// 1. INIT COMPONENTS
 	uid.Bits = 26
 	idGen := adapter.NewUIDAdapter(1)
-	logger := &SimpleLogger{}
+	logger, err := logg.NewFileLogger("logs/logs.log", 1, 20, 30)
 	q, err := queue.NewQueue(queue.Config{
 		LogPath:   "./data/queue/queue.log",
 		RedisAddr: "", // GetRoomID Không dùng Redis, để trống
@@ -192,21 +194,4 @@ func main() {
 	if err := http.ListenAndServe(":8080", nil); err != nil {
 		log.Fatal("Server error:", err)
 	}
-}
-
-// SIMPLE LOGGER
-
-type SimpleLogger struct{}
-
-func (l *SimpleLogger) Info(msg string, args ...interface{}) {
-	log.Printf("[INFO] "+msg, args...)
-}
-func (l *SimpleLogger) Error(msg string, args ...interface{}) {
-	log.Printf("[ERROR] "+msg, args...)
-}
-func (l *SimpleLogger) Debug(msg string, args ...interface{}) {
-	log.Printf("[DEBUG] "+msg, args...)
-}
-func (l *SimpleLogger) Warn(msg string, args ...interface{}) {
-	log.Printf("[WARN] "+msg, args...)
 }

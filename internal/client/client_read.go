@@ -2,19 +2,21 @@ package client
 
 import (
 	"encoding/json"
+	"fmt"
+	"time"
+
 	"github.com/DVV-15324/witches-realtime/internal/model"
 	"github.com/gorilla/websocket"
-	"time"
 )
 
 func (c *Client) ReadPump() {
 	defer func() {
 		c.Hub.GetUnRegister() <- c
 		c.Conn.Close()
-		c.logger.Info("ReadPump stopped", "id", c.ID)
+		c.logger.Info(fmt.Sprintf("ReadPump stopped, id=%s", c.ID))
 	}()
 
-	c.logger.Info("ReadPump started", "id", c.ID)
+	c.logger.Info(fmt.Sprintf("ReadPump started, id=%s", c.ID))
 	c.Conn.SetReadDeadline(time.Now().Add(60 * time.Second))
 	c.Conn.SetPongHandler(func(string) error {
 		c.Conn.SetReadDeadline(time.Now().Add(60 * time.Second))
@@ -25,9 +27,9 @@ func (c *Client) ReadPump() {
 		_, message, err := c.Conn.ReadMessage()
 		if err != nil {
 			if websocket.IsUnexpectedCloseError(err, websocket.CloseGoingAway, websocket.CloseAbnormalClosure) {
-				c.logger.Error("read error", "id", c.ID, "err", err)
+				c.logger.Error(fmt.Sprintf("read error, id=%s, err=%v", c.ID, err))
 			} else {
-				c.logger.Info("read closed", "id", c.ID, "err", err)
+				c.logger.Info(fmt.Sprintf("read closed, id=%s, err=%v", c.ID, err))
 			}
 			break
 		}

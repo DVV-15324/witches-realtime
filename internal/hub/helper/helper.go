@@ -1,6 +1,8 @@
 package helper
 
 import (
+	"fmt"
+
 	"github.com/DVV-15324/witches-realtime/internal/hub/broardcast/broker"
 	"github.com/DVV-15324/witches-realtime/internal/model"
 	"github.com/DVV-15324/witches-realtime/internal/types"
@@ -63,13 +65,13 @@ func CloseAll(h types.IHub) {
 		h.GetBroker().Close()
 	}
 
-	h.GetLogger().Info("all GetClients() closed")
+	h.GetLogger().Info("all clients closed")
 }
 
 func BroadcastToAll(h types.IHub, msg model.Message) {
 	data, err := msg.ToJSON()
 	if err != nil {
-		h.GetLogger().Error("marshal error", "err", err)
+		h.GetLogger().Error(fmt.Sprintf("marshal error: %v", err))
 		return
 	}
 	broker.BroadcastToBrokerClients(h, data)

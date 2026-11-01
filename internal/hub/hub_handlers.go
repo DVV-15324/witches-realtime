@@ -2,11 +2,13 @@ package hub
 
 import (
 	"encoding/json"
+	"fmt"
+	"time"
+
 	"github.com/DVV-15324/witches-realtime/internal/hub/broardcast/broker"
 	"github.com/DVV-15324/witches-realtime/internal/hub/broardcast/local"
 	"github.com/DVV-15324/witches-realtime/internal/queue"
 	"github.com/DVV-15324/witches-realtime/internal/types"
-	"time"
 )
 
 type LocalMessage struct {
@@ -47,10 +49,7 @@ func (h *Hub) handleLocalMessage(msg LocalMessage) {
 	// 1. GHI FILE LOG
 	if h.fileWriter != nil {
 		if err := h.fileWriter.Write(message); err != nil {
-			h.logger.Error(
-				"failed to write message to file",
-				"err", err,
-			)
+			h.logger.Error(fmt.Sprintf("failed to write message to file: %v", err))
 		}
 	}
 
@@ -76,10 +75,7 @@ func (h *Hub) handleLocalMessage(msg LocalMessage) {
 		)
 
 		if err := msgQueue.Push(queueMsg); err != nil {
-			h.logger.Error(
-				"queue push error",
-				"err", err,
-			)
+			h.logger.Error(fmt.Sprintf("queue push error: %v", err))
 		}
 
 		return
@@ -87,10 +83,7 @@ func (h *Hub) handleLocalMessage(msg LocalMessage) {
 
 	if h.broker != nil {
 		if err := h.broker.Publish(message); err != nil {
-			h.logger.Error(
-				"broker publish error",
-				"err", err,
-			)
+			h.logger.Error(fmt.Sprintf("broker publish error: %v", err))
 		}
 	}
 }
@@ -108,10 +101,7 @@ func (h *Hub) handleBrokerEvent(message []byte) {
 		if serverID, ok := meta["__server_id"].(string); ok &&
 			serverID == h.serverID {
 
-			h.logger.Debug(
-				"skipping message from same server",
-				"serverID", serverID,
-			)
+			h.logger.Debug(fmt.Sprintf("skipping message from same server, serverID=%s", serverID))
 
 			return
 		}
@@ -120,10 +110,7 @@ func (h *Hub) handleBrokerEvent(message []byte) {
 	// 1. GHI FILE LOG
 	if h.fileWriter != nil {
 		if err := h.fileWriter.Write(message); err != nil {
-			h.logger.Error(
-				"failed to write broker message to file",
-				"err", err,
-			)
+			h.logger.Error(fmt.Sprintf("failed to write broker message to file: %v", err))
 		}
 	}
 
@@ -155,10 +142,7 @@ func (h *Hub) handleBrokerEvent(message []byte) {
 			)
 
 			if err := msgQueue.Push(queueMsg); err != nil {
-				h.logger.Error(
-					"queue push error (broker room)",
-					"err", err,
-				)
+				h.logger.Error(fmt.Sprintf("queue push error (broker room): %v", err))
 			}
 		}
 
@@ -181,10 +165,7 @@ func (h *Hub) handleBrokerEvent(message []byte) {
 		)
 
 		if err := msgQueue.Push(queueMsg); err != nil {
-			h.logger.Error(
-				"queue push error (broker)",
-				"err", err,
-			)
+			h.logger.Error(fmt.Sprintf("queue push error (broker): %v", err))
 		}
 	}
 }

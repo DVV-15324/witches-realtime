@@ -15,6 +15,7 @@ import (
 	"github.com/DVV-15324/witches-realtime/internal/worker"
 	"github.com/DVV-15324/witches-realtime/pkg/adapter"
 	"github.com/DVV-15324/witches-realtime/pkg/uid"
+	logg "github.com/DVV-15324/witches/pkg/core/response/logger"
 	"log"
 	"net/http"
 	"time"
@@ -26,7 +27,7 @@ func main() {
 	//
 	uid.Bits = 26
 	idGen := adapter.NewUIDAdapter(1)
-	logger := &SimpleLogger{}
+	logger, err := logg.NewFileLogger("logs/logs.log", 1, 20, 30)
 
 	//
 	// 2. INIT REDIS BROKER

@@ -1,6 +1,8 @@
 package broker
 
 import (
+	"fmt"
+
 	"github.com/DVV-15324/witches-realtime/internal/model"
 	"github.com/DVV-15324/witches-realtime/internal/queue"
 	"github.com/DVV-15324/witches-realtime/internal/types"
@@ -9,7 +11,7 @@ import (
 func BroadcastToAllAndBroker(h types.IHub, msg model.Message, msgQueue *queue.Queue) {
 	data, err := msg.ToJSON()
 	if err != nil {
-		h.GetLogger().Error("marshal error", "err", err)
+		h.GetLogger().Error(fmt.Sprintf("marshal error: %v", err))
 		return
 	}
 
@@ -18,12 +20,12 @@ func BroadcastToAllAndBroker(h types.IHub, msg model.Message, msgQueue *queue.Qu
 	if msgQueue != nil {
 		queueMsg := queue.NewMessage("broker", "", data, "")
 		if err := msgQueue.Push(queueMsg); err != nil {
-			h.GetLogger().Error("queue push error", "err", err)
+			h.GetLogger().Error(fmt.Sprintf("queue push error: %v", err))
 		}
 	} else {
 		if h.GetBroker() != nil {
 			if err := h.GetBroker().Publish(data); err != nil {
-				h.GetLogger().Error("broker publish error", "err", err)
+				h.GetLogger().Error(fmt.Sprintf("broker publish error: %v", err))
 			}
 		}
 	}
@@ -39,9 +41,7 @@ func BroadcastToBrokerClients(h types.IHub, message []byte) {
 
 	for _, client := range clients {
 		if err := client.SendBytes(message); err != nil {
-			h.GetLogger().Error("broadcastBrokerClients send error",
-				"clientID", client.GetID(),
-				"err", err)
+			h.GetLogger().Error(fmt.Sprintf("broadcastBrokerClients send error, clientID=%s, err=%v", client.GetID(), err))
 		}
 	}
 }

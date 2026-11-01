@@ -1,6 +1,8 @@
 package action
 
 import (
+	"fmt"
+
 	"github.com/DVV-15324/witches-realtime/internal/types"
 )
 
@@ -13,7 +15,7 @@ func JoinRoom(h types.IHub, clientID, room string) {
 	}
 	if client, ok := h.GetClients()[clientID]; ok {
 		h.GetRooms()[room][clientID] = client
-		h.GetLogger().Info("client joined room", "clientID", clientID, "room", room)
+		h.GetLogger().Info(fmt.Sprintf("client joined room, clientID=%s, room=%s", clientID, room))
 	}
 }
 
@@ -26,6 +28,6 @@ func LeaveRoom(h types.IHub, clientID, room string) {
 		if len(members) == 0 {
 			delete(h.GetRooms(), room)
 		}
-		h.GetLogger().Info("client left room", "clientID", clientID, "room", room)
+		h.GetLogger().Info(fmt.Sprintf("client left room, clientID=%s, room=%s", clientID, room))
 	}
 }
