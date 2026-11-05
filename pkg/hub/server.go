@@ -1,6 +1,7 @@
 package hub
 
 import (
+	"context"
 	"fmt"
 	"net/http"
 	"strings"
@@ -9,18 +10,21 @@ import (
 	"github.com/DVV-15324/witches-realtime/pkg/client"
 	"github.com/DVV-15324/witches-realtime/pkg/types"
 	"github.com/gorilla/websocket"
+	"github.com/redis/go-redis/v9"
 )
 
 type Server struct {
 	hub      *Hub
 	logger   types.ILogger
 	upgrader websocket.Upgrader
+	rdb      *redis.Client
 }
 
-func NewServer(hub *Hub, logger types.ILogger) *Server {
+func NewServer(hub *Hub, logger types.ILogger, rdb *redis.Client) *Server {
 	return &Server{
 		hub:    hub,
 		logger: logger,
+		rdb:    rdb,
 		upgrader: websocket.Upgrader{
 			CheckOrigin: func(r *http.Request) bool { return true },
 		},
@@ -53,7 +57,17 @@ func (s *Server) Handler() http.HandlerFunc {
 		}
 
 		clientID := fmt.Sprintf("%s-%d", userID, time.Now().UnixNano())
-		c := client.New(clientID, userID, conn, s.logger)
+
+		// Tạo Callback để xử lý khi FE gửi lệnh
+		onMessage := func(uid string, msg []byte) {
+			s.logger.Info(fmt.Sprintf("Received command from Flutter (%s): %s", uid, string(msg)))
+
+			err := s.rdb.Publish(context.Background(), "mqtt-commands", msg).Err()
+			if err != nil {
+				s.logger.Error(fmt.Sprintf("Failed to publish command to Redis: %v", err))
+			}
+		}
+		c := client.New(clientID, userID, conn, onMessage, s.logger)
 		s.hub.Register(c, rooms)
 
 		go c.WritePump()
