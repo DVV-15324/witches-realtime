@@ -9,6 +9,9 @@ import (
 	"github.com/gorilla/websocket"
 )
 
+// Thêm kiểu dữ liệu cho callback
+type MessageHandler func(userID string, msg []byte)
+
 type Client struct {
 	id        string
 	userID    string
@@ -17,9 +20,10 @@ type Client struct {
 	logger    types.ILogger
 	closed    chan struct{}
 	closeOnce sync.Once
+	onMessage MessageHandler
 }
 
-func New(id, userID string, conn *websocket.Conn, logger types.ILogger) *Client {
+func New(id, userID string, conn *websocket.Conn, onMessage MessageHandler, logger types.ILogger) *Client {
 	return &Client{
 		id:     id,
 		userID: userID,
@@ -96,10 +100,13 @@ func (c *Client) ReadPump(onClose func(types.IClient)) {
 	})
 
 	for {
-		_, _, err := c.conn.ReadMessage()
+		_, msg, err := c.conn.ReadMessage()
 		if err != nil {
 			c.logger.Info(fmt.Sprintf("read closed, id=%s, err=%v", c.id, err))
 			return
+		}
+		if len(msg) > 0 && c.onMessage != nil {
+			c.onMessage(c.userID, msg)
 		}
 	}
 }
