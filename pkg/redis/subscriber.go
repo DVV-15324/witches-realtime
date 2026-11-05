@@ -60,3 +60,7 @@ func (s *Subscriber) Subscribe(ctx context.Context) (<-chan []byte, error) {
 func (s *Subscriber) Close() error {
 	return s.client.Close()
 }
+
+func (s *Subscriber) GetClient() *redis.Client {
+	return s.client
+}

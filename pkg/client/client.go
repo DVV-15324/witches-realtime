@@ -25,12 +25,13 @@ type Client struct {
 
 func New(id, userID string, conn *websocket.Conn, onMessage MessageHandler, logger types.ILogger) *Client {
 	return &Client{
-		id:     id,
-		userID: userID,
-		conn:   conn,
-		send:   make(chan []byte, 256),
-		logger: logger,
-		closed: make(chan struct{}),
+		id:        id,
+		userID:    userID,
+		conn:      conn,
+		send:      make(chan []byte, 256),
+		logger:    logger,
+		closed:    make(chan struct{}),
+		onMessage: onMessage,
 	}
 }
 
