@@ -14,21 +14,21 @@ func (h *Hub) handleBroadcast(data []byte) {
 		return
 	}
 	if msg.TargetID != "" {
-		h.broadcastToUser(msg.TargetID, msg.Payload)
+		h.broadcastToUser(msg.TargetID, data)
 		return
 	}
 	if msg.RoomID != "" {
 		if msg.Except != "" {
-			h.broadcastRoomExcept(msg.RoomID, msg.Except, msg.Payload)
+			h.broadcastRoomExcept(msg.RoomID, msg.Except, data)
 		} else {
-			h.broadcastRoom(msg.RoomID, msg.Payload)
+			h.broadcastRoom(msg.RoomID, data)
 		}
 		return
 	}
 	if msg.Except != "" {
-		h.broadcastAllExcept(msg.Except, msg.Payload)
+		h.broadcastAllExcept(msg.Except, data)
 	} else {
-		h.broadcastAll(msg.Payload)
+		h.broadcastAll(data)
 	}
 }
 
