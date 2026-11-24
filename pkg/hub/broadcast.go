@@ -8,11 +8,22 @@ import (
 )
 
 func (h *Hub) handleBroadcast(data []byte) {
+	h.logger.Info(fmt.Sprintf(
+		"[BROADCAST] PROCESSING | payload=%s",
+		string(data),
+	))
 	msg, err := model.FromJSON(data)
 	if err != nil {
 		h.logger.Error(fmt.Sprintf("parse broadcast: %v", err))
 		return
 	}
+	h.logger.Info(fmt.Sprintf(
+		"[BROADCAST] ROUTING | type=%s target=%s room=%s except=%s",
+		msg.Type,
+		msg.TargetID,
+		msg.RoomID,
+		msg.Except,
+	))
 	if msg.TargetID != "" {
 		h.broadcastToUser(msg.TargetID, data)
 		return
